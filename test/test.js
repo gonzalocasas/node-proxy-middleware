@@ -1,6 +1,5 @@
 var connect = require('connect')
   , assert = require('assert')
-  , longjohn = require('longjohn')
   , proxy = require('../');
 
 describe("proxy", function() {
