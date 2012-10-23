@@ -1,6 +1,10 @@
 var connect = require('connect')
   , assert = require('assert')
-  , proxy = require('../');
+  , proxy = require('../')
+  , fs = require('fs')
+  , path = require('path')
+  , key = fs.readFileSync(path.join(__dirname, "server.key"))
+  , cert = fs.readFileSync(path.join(__dirname, "server.crt"))
 
 describe("proxy", function() {
   it("http -> https", function(done) {
@@ -20,11 +24,20 @@ describe("proxy", function() {
   });
 });
 
+function createServerWithLibName(libName, requestListener) {
+  var httpLib = require(libName);
+  if (libName === "http") {
+    return httpLib.createServer(requestListener);
+  } else {
+    return httpLib.createServer({key: key, cert: cert}, requestListener);
+  }
+}
+
 function testWith (srcLibName, destLibName, cb) {
   var srcHttp = require(srcLibName);
   var destHttp = require(destLibName);
 
-  var destServer = destHttp.createServer(function(req, resp) {
+  var destServer = createServerWithLibName(destLibName, function(req, resp) {
     assert.strictEqual(req.method, 'GET');
     assert.strictEqual(req.headers['x-custom-header'], 'hello');
     assert.strictEqual(req.url, '/api/a/b/c/d');
@@ -37,7 +50,7 @@ function testWith (srcLibName, destLibName, cb) {
     var app = connect();
     var destEndpoint = destLibName + "://localhost:" + destServer.address().port + "/api";
     app.use(proxy(destEndpoint));
-    var srcServer = srcHttp.createServer(app);
+    var srcServer = createServerWithLibName(srcLibName, app);
     srcServer.listen(0, 'localhost', function() {
       // make client request to proxy server
       var srcRequest = srcHttp.request({
