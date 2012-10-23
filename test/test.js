@@ -2,6 +2,7 @@ var connect = require('connect')
   , assert = require('assert')
   , proxy = require('../')
   , fs = require('fs')
+  , url = require('url')
   , path = require('path')
   , key = fs.readFileSync(path.join(__dirname, "server.key"))
   , cert = fs.readFileSync(path.join(__dirname, "server.crt"))
@@ -49,7 +50,9 @@ function testWith (srcLibName, destLibName, cb) {
   destServer.listen(0, 'localhost', function() {
     var app = connect();
     var destEndpoint = destLibName + "://localhost:" + destServer.address().port + "/api";
-    app.use(proxy(destEndpoint));
+    var reqOpts = url.parse(destEndpoint);
+    reqOpts.rejectUnauthorized = false; // because we're self-signing for tests
+    app.use(proxy(reqOpts));
     var srcServer = createServerWithLibName(srcLibName, app);
     srcServer.listen(0, 'localhost', function() {
       // make client request to proxy server
@@ -60,6 +63,7 @@ function testWith (srcLibName, destLibName, cb) {
         headers: {
           "x-custom-header": "hello"
         },
+        rejectUnauthorized: false,
       }, function (resp) {
         var buffer = "";
         assert.strictEqual(resp.statusCode, 200);
