@@ -8,7 +8,7 @@ var connect = require('connect')
   , proxy = require('proxy-middleware')
 
 var app = connect();
-connect.use('/api', proxy(url.parse("https://example.com/endpoint")));
+app.use('/api', proxy(url.parse("https://example.com/endpoint")));
 ```
 
 ### Documentation:
