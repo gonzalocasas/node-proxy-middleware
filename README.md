@@ -9,6 +9,7 @@ var connect = require('connect')
 
 var app = connect();
 app.use('/api', proxy(url.parse("https://example.com/endpoint")));
+// now requests to "/api/x/y/z" are proxied to "https://example.com/endpoint/x/y/z"
 ```
 
 ### Documentation:
