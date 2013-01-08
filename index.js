@@ -9,6 +9,15 @@ function slashJoin(p1, p2) {
   return p1 + '/' + p2;
 }
 
+function extend(to, from) {
+  for (var prop in from) {
+    if (from.hasOwnProperty(prop)) {
+      to[prop] = from[prop];
+    }
+  }
+  return to;
+}
+
 module.exports = function proxyMiddleware(options) {
   var httpLib = options.protocol === 'https:' ? 'https' : 'http';
   var request = require(httpLib).request;
@@ -18,7 +27,7 @@ module.exports = function proxyMiddleware(options) {
   return function (req, resp, next) {
     options.path = slashJoin(options.pathname, req.url);
     options.method = req.method;
-    options.headers = req.headers;
+    options.headers = options.headers ? extend(req.headers, options.headers) : req.headers;
     var myReq = request(options, function (myRes) {
       resp.writeHead(myRes.statusCode, myRes.headers);
       myRes.on('error', function (err) {
