@@ -1,3 +1,6 @@
+/*jshint indent:2 globalstrict:true */
+/*global module require */
+
 module.exports = function proxyMiddleware(options) {
   var httpLib = options.protocol === 'https:' ? 'https' : 'http';
   var request = require(httpLib).request;
