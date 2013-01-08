@@ -3,6 +3,12 @@
 
 "use strict";
 
+function slashJoin(p1, p2) {
+  if (p1.length && p1[p1.length - 1] === '/') {p1 = p1.substring(0, p1.length - 1); }
+  if (p2.length && p2[0] === '/') {p2 = p2.substring(1); }
+  return p1 + '/' + p2;
+}
+
 module.exports = function proxyMiddleware(options) {
   var httpLib = options.protocol === 'https:' ? 'https' : 'http';
   var request = require(httpLib).request;
@@ -27,11 +33,6 @@ module.exports = function proxyMiddleware(options) {
   };
 };
 
-function slashJoin(p1, p2) {
-  if (p1.length && p1[p1.length - 1] === '/') p1 = p1.substring(0, p1.length - 1);
-  if (p2.length && p2[0] === '/') p2 = p2.substring(1);
-  return p1 + '/' + p2;
-}
 // Local Variables:
 // js-indent-level: 2
 // End:
