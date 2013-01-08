@@ -21,12 +21,12 @@ module.exports = function proxyMiddleware(options) {
     options.headers = req.headers;
     var myReq = request(options, function (myRes) {
       resp.writeHead(myRes.statusCode, myRes.headers);
-      myRes.on('error', function(err) {
+      myRes.on('error', function (err) {
         next(err);
       });
       myRes.pipe(resp);
     });
-    myReq.on('error', function(err) {
+    myReq.on('error', function (err) {
       next(err);
     });
     req.pipe(myReq);
