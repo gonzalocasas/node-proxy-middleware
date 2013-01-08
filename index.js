@@ -27,3 +27,6 @@ function slashJoin(p1, p2) {
   if (p2.length && p2[0] === '/') p2 = p2.substring(1);
   return p1 + '/' + p2;
 }
+// Local Variables:
+// js-indent-level: 2
+// End:
