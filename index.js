@@ -38,7 +38,11 @@ module.exports = function proxyMiddleware(options) {
     myReq.on('error', function (err) {
       next(err);
     });
-    req.pipe(myReq);
+    if (!req.readable) {
+      myReq.end();
+    } else {
+      req.pipe(myReq);
+    }
   };
 };
 
