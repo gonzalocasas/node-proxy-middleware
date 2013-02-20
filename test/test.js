@@ -4,6 +4,8 @@ var connect = require('connect')
   , fs = require('fs')
   , url = require('url')
   , path = require('path')
+  , http = require('http')
+  , exec = require('child_process').exec
   , key = fs.readFileSync(path.join(__dirname, "server.key"))
   , cert = fs.readFileSync(path.join(__dirname, "server.crt"))
 
@@ -22,6 +24,28 @@ describe("proxy", function() {
 
   it("https -> https", function(done) {
     testWith('https', 'https', done);
+  });
+
+  it("Can still proxy empty requests if the request stream has ended.", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.write('OK');
+      resp.end();
+    });
+
+    var app = connect();
+    //connect.directory causes the incoming request stream to be ended for GETs.
+    app.use(connect.directory(path.resolve('.')));
+    app.use('/foo', proxy(url.parse('http://localhost:8001/')));
+
+    destServer.listen(8001, 'localhost', function() {
+      app.listen(8000);
+      http.get('http://localhost:8000/foo', function(res) {
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
   });
 });
 
