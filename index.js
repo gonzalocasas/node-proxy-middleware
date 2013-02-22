@@ -6,6 +6,11 @@ module.exports = function proxyMiddleware(options) {
   options.hostname = options.hostname;
   options.port = options.port;
   return function (req, resp, next) {
+    if (typeof options.route === 'string') {
+      if (req.url.slice(0, options.route.length) !== options.route) {
+        return next();
+      }
+    }
     options.path = slashJoin(options.pathname, req.url);
     options.method = req.method;
     options.headers = options.headers ? extend(req.headers, options.headers) : req.headers;
