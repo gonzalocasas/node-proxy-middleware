@@ -29,7 +29,7 @@ describe("proxy", function() {
   it("Can still proxy empty requests if the request stream has ended.", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 200;
-      resp.write('OK');
+      resp.write(req.url);
       resp.end();
     });
 
@@ -40,8 +40,48 @@ describe("proxy", function() {
 
     destServer.listen(8001, 'localhost', function() {
       app.listen(8000);
-      http.get('http://localhost:8000/foo', function(res) {
-        done();
+      http.get('http://localhost:8000/foo/test/', function(res) {
+        var data = '';
+        res.on('data', function (chunk) {
+          data += chunk;
+        });
+        res.on('end', function () {
+          assert.strictEqual(data, '/test/');
+          done();
+        });
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("can proxy just the given route.", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8003/');
+    proxyOptions.route = '/foo';
+
+    var app = connect(
+      connect.directory(path.resolve('.')),
+      // we must pass the route within the options here
+      proxy(proxyOptions)
+    );
+
+    destServer.listen(8003, 'localhost', function() {
+      app.listen(8002);
+      http.get('http://localhost:8002/foo/test/', function(res) {
+        var data = '';
+        res.on('data', function (chunk) {
+          data += chunk;
+        });
+        res.on('end', function () {
+          assert.strictEqual(data, '/test/');
+          done();
+        });
       }).on('error', function () {
         assert.fail('Request proxy failed');
       });

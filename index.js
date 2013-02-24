@@ -6,7 +6,17 @@ module.exports = function proxyMiddleware(options) {
   options.hostname = options.hostname;
   options.port = options.port;
   return function (req, resp, next) {
-    options.path = slashJoin(options.pathname, req.url);
+    var url = req.url;
+    // You can pass the route within the options, as well
+    if (typeof options.route === 'string') {
+      var route = slashJoin(options.route, '');
+      if (url.slice(0, route.length) === route) {
+        url = url.slice(route.length);
+      } else {
+        return next();
+      }
+    }
+    options.path = slashJoin(options.pathname, url);
     options.method = req.method;
     options.headers = options.headers ? extend(req.headers, options.headers) : req.headers;
     var myReq = request(options, function (myRes) {
