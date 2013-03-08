@@ -47,6 +47,7 @@ describe("proxy", function() {
         });
         res.on('end', function () {
           assert.strictEqual(data, '/test/');
+          destServer.close();
           done();
         });
       }).on('error', function () {
@@ -80,6 +81,7 @@ describe("proxy", function() {
         });
         res.on('end', function () {
           assert.strictEqual(data, '/test/');
+          destServer.close();
           done();
         });
       }).on('error', function () {
@@ -87,6 +89,44 @@ describe("proxy", function() {
       });
     });
   });
+
+  it("Does not keep header data across requests", function(done) {
+    var headerValues = ['foo', 'bar'];
+    var reqIdx = 0;
+
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      assert.strictEqual(req.headers['some-header'], headerValues[reqIdx]);
+      reqIdx++;
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var app = connect(proxy(url.parse('http://localhost:8005/')));
+
+    destServer.listen(8005, 'localhost', function() {
+      app.listen(8004);
+
+      var options = url.parse('http://localhost:8004/foo/test/');
+
+      //Get with 0 content length, then 56;
+      options.headers = {'some-header': headerValues[0]};
+      http.get(options, function () {
+
+        options.headers['some-header'] = headerValues[1];
+        http.get(options, function () {
+          destServer.close();
+          done();
+        }).on('error', function () {
+          assert.fail('Request proxy failed');
+        });
+
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
 });
 
 function createServerWithLibName(libName, requestListener) {

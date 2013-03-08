@@ -5,6 +5,7 @@ module.exports = function proxyMiddleware(options) {
   options = options || {};
   options.hostname = options.hostname;
   options.port = options.port;
+
   return function (req, resp, next) {
     var url = req.url;
     // You can pass the route within the options, as well
@@ -16,10 +17,14 @@ module.exports = function proxyMiddleware(options) {
         return next();
       }
     }
-    options.path = slashJoin(options.pathname, url);
-    options.method = req.method;
-    options.headers = options.headers ? extend(req.headers, options.headers) : req.headers;
-    var myReq = request(options, function (myRes) {
+
+    //options for this request
+    var opts = extend({}, options);
+    opts.path = slashJoin(options.pathname, url);
+    opts.method = req.method;
+    opts.headers = options.headers ? merge(req.headers, options.headers) : req.headers;
+
+    var myReq = request(opts, function (myRes) {
       resp.writeHead(myRes.statusCode, myRes.headers);
       myRes.on('error', function (err) {
         next(err);
@@ -46,4 +51,12 @@ function slashJoin(p1, p2) {
 function extend(obj, src) {
   for (var key in src) if (owns.call(src, key)) obj[key] = src[key];
   return obj;
+}
+
+//merges data without changing state in either argument
+function merge(src1, src2) {
+    var merged = {};
+    extend(merged, src1);
+    extend(merged, src2);
+    return merged;
 }
