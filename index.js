@@ -24,6 +24,9 @@ module.exports = function proxyMiddleware(options) {
     opts.method = req.method;
     opts.headers = options.headers ? merge(req.headers, options.headers) : req.headers;
 
+    // Forwarding the host breaks dotcloud
+    delete opts.headers["host"]
+
     var myReq = request(opts, function (myRes) {
       resp.writeHead(myRes.statusCode, myRes.headers);
       myRes.on('error', function (err) {
