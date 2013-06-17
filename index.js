@@ -67,8 +67,6 @@ function applyViaHeader(existingHeaders, opts, applyTo) {
         viaHeader = existingHeaders.via + ', ' + viaHeader;
     }
 
-    //console.log(viaHeader);
-
     applyTo.via = viaHeader;
 
 }
