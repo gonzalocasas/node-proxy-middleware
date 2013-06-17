@@ -1,5 +1,6 @@
 var owns = {}.hasOwnProperty;
 module.exports = function proxyMiddleware(options) {
+  
   var httpLib = options.protocol === 'https:' ? 'https' : 'http';
   var request = require(httpLib).request;
   options = options || {};
@@ -24,10 +25,13 @@ module.exports = function proxyMiddleware(options) {
     opts.method = req.method;
     opts.headers = options.headers ? merge(req.headers, options.headers) : req.headers;
 
-    // Forwarding the host breaks dotcloud
-    delete opts.headers["host"]
+    applyViaHeader(req.headers, opts, opts.headers);
 
+    // Forwarding the host breaks dotcloud
+    delete opts.headers["host"];
+    
     var myReq = request(opts, function (myRes) {
+      applyViaHeader(myRes.headers, opts, myRes.headers);
       resp.writeHead(myRes.statusCode, myRes.headers);
       myRes.on('error', function (err) {
         next(err);
@@ -44,6 +48,30 @@ module.exports = function proxyMiddleware(options) {
     }
   };
 };
+
+function applyViaHeader(existingHeaders, opts, applyTo) {
+
+  if(!opts.via) {
+    return;
+  }
+  
+  var viaName = (true === opts.via) ?
+    // use the host name
+    require('os').hostname() :
+    // or use whatever was passed as the options.via value
+    opts.via;
+
+    var viaHeader = '1.1 ' + viaName;
+
+    if(existingHeaders.via) {
+        viaHeader = existingHeaders.via + ', ' + viaHeader;
+    }
+
+    //console.log(viaHeader);
+
+    applyTo.via = viaHeader;
+
+}
 
 function slashJoin(p1, p2) {
   if (p1.length && p1[p1.length - 1] === '/') {p1 = p1.substring(0, p1.length - 1); }

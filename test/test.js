@@ -127,6 +127,114 @@ describe("proxy", function() {
     });
   });
 
+  it("correctly applies the via header to the request", function(done) {
+
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      assert.strictEqual(req.headers.via, '1.1 my-proxy-name');
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8015/');
+    proxyOptions.via = 'my-proxy-name';
+    var app = connect(proxy(proxyOptions));
+
+    destServer.listen(8015, 'localhost', function() {
+      app.listen(8014);
+
+      var options = url.parse('http://localhost:8014/foo/test/');
+
+      http.get(options, function () {
+        // ok...
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("correctly applies the via header to the request where the request has an existing via header", function(done) {
+
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      assert.strictEqual(req.headers.via, '1.0 other-proxy-name, 1.1 my-proxy-name');
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8025/');
+    proxyOptions.via = 'my-proxy-name';
+    var app = connect(proxy(proxyOptions));
+
+    destServer.listen(8025, 'localhost', function() {
+      app.listen(8024);
+
+      var options = url.parse('http://localhost:8024/foo/test/');
+      options.headers = {via: '1.0 other-proxy-name'};
+
+      http.get(options, function () {
+        // ok...
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("correctly applies the via header to the response", function(done) {
+
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8035/');
+    proxyOptions.via = 'my-proxy-name';
+    var app = connect(proxy(proxyOptions));
+
+    destServer.listen(8035, 'localhost', function() {
+      app.listen(8034);
+
+      var options = url.parse('http://localhost:8034/foo/test/');
+
+      http.get(options, function (res) {
+        assert.strictEqual('1.1 my-proxy-name', res.headers.via);
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("correctly applies the via header to the response where the response has an existing via header", function(done) {
+
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.setHeader('via', '1.0 other-proxy-name');
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8045/');
+    proxyOptions.via = 'my-proxy-name';
+    var app = connect(proxy(proxyOptions));
+
+    destServer.listen(8045, 'localhost', function() {
+      app.listen(8044);
+
+      var options = url.parse('http://localhost:8044/foo/test/');
+
+      http.get(options, function (res) {
+        assert.strictEqual('1.0 other-proxy-name, 1.1 my-proxy-name', res.headers.via);
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
 });
 
 function createServerWithLibName(libName, requestListener) {
@@ -167,7 +275,7 @@ function testWith (srcLibName, destLibName, cb) {
         headers: {
           "x-custom-header": "hello"
         },
-        rejectUnauthorized: false,
+        rejectUnauthorized: false
       }, function (resp) {
         var buffer = "";
         assert.strictEqual(resp.statusCode, 200);
@@ -178,7 +286,7 @@ function testWith (srcLibName, destLibName, cb) {
         });
         resp.on('end', function() {
           assert.strictEqual(buffer, 'this is your body.');
-          srcServer.close()
+          srcServer.close();
           destServer.close();
           cb();
         });
