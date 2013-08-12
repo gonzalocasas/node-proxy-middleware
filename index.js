@@ -32,10 +32,12 @@ module.exports = function proxyMiddleware(options) {
     
     var myReq = request(opts, function (myRes) {
       var statusCode = myRes.statusCode
-        , headers = myRes.headers;
+        , headers = myRes.headers
+        , location = headers.location;
       // Fix the location
-      if (statusCode > 300 && statusCode < 304) {
-        headers.location = headers.location.replace(options.href, req.headers.origin + slashJoin((options.route || ''), '/'));
+      if (statusCode > 300 && statusCode < 304 && location.indexOf(options.href) > -1) {
+        // absoulte path
+        headers.location = location.replace(options.href, slashJoin('', slashJoin((options.route || ''), '')));
       }
       applyViaHeader(myRes.headers, opts, myRes.headers);
       resp.writeHead(myRes.statusCode, myRes.headers);
