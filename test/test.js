@@ -235,6 +235,31 @@ describe("proxy", function() {
     });
   });
 
+  it("correctly apllies the location header to the response when the response status code is 3xx", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 302;
+      resp.setHeader('location', 'http://localhost:8055/foo/redirect/');
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8055/');
+    var app = connect(proxy(proxyOptions));
+
+    destServer.listen(8055, 'localhost', function() {
+      app.listen(8054);
+
+      var options = url.parse('http://localhost:8054/foo/test/');
+
+      http.get(options, function (res) {
+        assert.strictEqual('/foo/redirect/', res.headers.location);
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    })
+  });
+
 });
 
 function createServerWithLibName(libName, requestListener) {
