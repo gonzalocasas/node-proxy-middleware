@@ -1,11 +1,11 @@
-[![Build Status](https://secure.travis-ci.org/superjoe30/connect-proxy.png)](http://travis-ci.org/superjoe30/connect-proxy)
+[![Build Status](https://secure.travis-ci.org/andrewrk/connect-proxy.png)](http://travis-ci.org/andrewrk/connect-proxy)
 
 ### Usage:
 
 ```js
-var connect = require('connect')
-  , url = require('url')
-  , proxy = require('proxy-middleware')
+var connect = require('connect');
+var url = require('url');
+var proxy = require('proxy-middleware');
 
 var app = connect();
 app.use('/api', proxy(url.parse('https://example.com/endpoint')));
