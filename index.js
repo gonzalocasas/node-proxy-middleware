@@ -84,16 +84,15 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo) {
     }
 
     var existingCookies = existingHeaders['set-cookie'],
+        rewrittenCookies = [],
         rewriteHostname = (true === opts.cookieRewrite) ? require('os').hostname() : opts.cookieRewrite;
 
     if (!require('util').isArray(existingCookies)) {
         existingCookies = [ existingCookies ];
     }
 
-    var i, existingCookie, rewrittenCookies = [];
-    for (i = 0; i < existingHeaders['set-cookie'].length; i++) {
-        existingCookie = existingHeaders['set-cookie'][i];
-        rewrittenCookies.push(existingCookie.replace(/(Domain)=[a-z\.-]*?;/gi, '$1=' + rewriteHostname + ';'));
+    for (var i = 0; i < existingCookies.length; i++) {
+        rewrittenCookies.push(existingCookies[i].replace(/(Domain)=[a-z\.-]*?;/gi, '$1=' + rewriteHostname + ';'));
     }
 
     applyTo['set-cookie'] = rewrittenCookies;
