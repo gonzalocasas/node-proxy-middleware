@@ -79,7 +79,7 @@ function applyViaHeader(existingHeaders, opts, applyTo) {
 }
 
 function rewriteCookieHosts(existingHeaders, opts, applyTo) {
-  if (!opts.cookieRewrite || owns(existingHeaders, 'set-cookie')) {
+  if (!opts.cookieRewrite || !owns.call(existingHeaders, 'set-cookie')) {
     return;
   }
 
@@ -92,7 +92,7 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo) {
   }
 
   for (var i = 0; i < existingCookies.length; i++) {
-    rewrittenCookies.push(existingCookies[i].replace(/(Domain)=[a-z\.-]*?;/gi, '$1=' + rewriteHostname + ';'));
+    rewrittenCookies.push(existingCookies[i].replace(/(Domain)=[a-z\.-_]*?(;|$)/gi, '$1=' + rewriteHostname + '$2'));
   }
 
   applyTo['set-cookie'] = rewrittenCookies;
