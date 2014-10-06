@@ -1,8 +1,12 @@
+var os = require('os');
+var http = require('http');
+var https = require('https');
 var owns = {}.hasOwnProperty;
+
 module.exports = function proxyMiddleware(options) {
 
-  var httpLib = options.protocol === 'https:' ? 'https' : 'http';
-  var request = require(httpLib).request;
+  var httpLib = options.protocol === 'https:' ? https : http;
+  var request = httpLib.request;
   options = options || {};
   options.hostname = options.hostname;
   options.port = options.port;
@@ -28,7 +32,7 @@ module.exports = function proxyMiddleware(options) {
     applyViaHeader(req.headers, opts, opts.headers);
 
     // Forwarding the host breaks dotcloud
-    delete opts.headers["host"];
+    delete opts.headers.host;
 
     var myReq = request(opts, function (myRes) {
       var statusCode = myRes.statusCode
@@ -59,23 +63,15 @@ module.exports = function proxyMiddleware(options) {
 };
 
 function applyViaHeader(existingHeaders, opts, applyTo) {
-  if(!opts.via) {
-    return;
+  if (!opts.via) return;
+
+  var viaName = (true === opts.via) ?  os.hostname() : opts.via;
+  var viaHeader = '1.1 ' + viaName;
+  if(existingHeaders.via) {
+    viaHeader = existingHeaders.via + ', ' + viaHeader;
   }
 
-  var viaName = (true === opts.via) ?
-    // use the host name
-    require('os').hostname() :
-    // or use whatever was passed as the options.via value
-    opts.via;
-
-    var viaHeader = '1.1 ' + viaName;
-
-    if(existingHeaders.via) {
-        viaHeader = existingHeaders.via + ', ' + viaHeader;
-    }
-
-    applyTo.via = viaHeader;
+  applyTo.via = viaHeader;
 }
 
 function rewriteCookieHosts(existingHeaders, opts, applyTo) {
@@ -85,9 +81,9 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo) {
 
   var existingCookies = existingHeaders['set-cookie'],
       rewrittenCookies = [],
-      rewriteHostname = (true === opts.cookieRewrite) ? require('os').hostname() : opts.cookieRewrite;
+      rewriteHostname = (true === opts.cookieRewrite) ? os.hostname() : opts.cookieRewrite;
 
-  if (!require('util').isArray(existingCookies)) {
+  if (!Array.isArray(existingCookies)) {
     existingCookies = [ existingCookies ];
   }
 
