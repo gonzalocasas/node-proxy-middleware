@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "mocha": "~1.21.4",
-    "connect": "~2.26.4"
+    "connect": "~3.2.0",
+    "serve-static": "~1.6.3"
   }
 }

@@ -6,6 +6,7 @@ var url = require('url');
 var path = require('path');
 var http = require('http');
 var exec = require('child_process').exec;
+var serveStatic = require('serve-static');
 var key = fs.readFileSync(path.join(__dirname, "server.key"));
 var cert = fs.readFileSync(path.join(__dirname, "server.crt"));
 var describe = global.describe;
@@ -36,8 +37,8 @@ describe("proxy", function() {
     });
 
     var app = connect();
-    //connect.directory causes the incoming request stream to be ended for GETs.
-    app.use(connect.directory(path.resolve('.')));
+    //serveStatic causes the incoming request stream to be ended for GETs.
+    app.use(serveStatic(path.resolve('.')));
     app.use('/foo', proxy(url.parse('http://localhost:8001/')));
 
     destServer.listen(8001, 'localhost', function() {
@@ -69,7 +70,7 @@ describe("proxy", function() {
     proxyOptions.route = '/foo';
 
     var app = connect();
-    // TODO app.use(serveStatic(path.resolve('.')))
+    app.use(serveStatic(path.resolve('.')));
     app.use(proxy(proxyOptions));
 
     destServer.listen(8003, 'localhost', function() {
