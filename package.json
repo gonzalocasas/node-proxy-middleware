@@ -24,7 +24,7 @@
     "node": ">=0.8.0"
   },
   "devDependencies": {
-    "mocha": "~1.6.0",
+    "mocha": "~1.21.4",
     "connect": "~2.6.0"
   }
 }

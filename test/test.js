@@ -1,13 +1,15 @@
-var connect = require('connect')
-  , assert = require('assert')
-  , proxy = require('../')
-  , fs = require('fs')
-  , url = require('url')
-  , path = require('path')
-  , http = require('http')
-  , exec = require('child_process').exec
-  , key = fs.readFileSync(path.join(__dirname, "server.key"))
-  , cert = fs.readFileSync(path.join(__dirname, "server.crt"))
+var connect = require('connect');
+var assert = require('assert');
+var proxy = require('../');
+var fs = require('fs');
+var url = require('url');
+var path = require('path');
+var http = require('http');
+var exec = require('child_process').exec;
+var key = fs.readFileSync(path.join(__dirname, "server.key"));
+var cert = fs.readFileSync(path.join(__dirname, "server.crt"));
+var describe = global.describe;
+var it = global.it;
 
 describe("proxy", function() {
   it("http -> https", function(done) {
