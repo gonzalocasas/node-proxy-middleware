@@ -68,11 +68,9 @@ describe("proxy", function() {
     var proxyOptions = url.parse('http://localhost:8003/');
     proxyOptions.route = '/foo';
 
-    var app = connect(
-      connect.directory(path.resolve('.')),
-      // we must pass the route within the options here
-      proxy(proxyOptions)
-    );
+    var app = connect();
+    // TODO app.use(serveStatic(path.resolve('.')))
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8003, 'localhost', function() {
       app.listen(8002);
@@ -104,7 +102,8 @@ describe("proxy", function() {
       resp.end();
     });
 
-    var app = connect(proxy(url.parse('http://localhost:8005/')));
+    var app = connect();
+    app.use(proxy(url.parse('http://localhost:8005/')));
 
     destServer.listen(8005, 'localhost', function() {
       app.listen(8004);
@@ -140,7 +139,8 @@ describe("proxy", function() {
 
     var proxyOptions = url.parse('http://localhost:8015/');
     proxyOptions.via = 'my-proxy-name';
-    var app = connect(proxy(proxyOptions));
+    var app = connect();
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8015, 'localhost', function() {
       app.listen(8014);
@@ -167,7 +167,8 @@ describe("proxy", function() {
 
     var proxyOptions = url.parse('http://localhost:8025/');
     proxyOptions.via = 'my-proxy-name';
-    var app = connect(proxy(proxyOptions));
+    var app = connect();
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8025, 'localhost', function() {
       app.listen(8024);
@@ -194,7 +195,8 @@ describe("proxy", function() {
 
     var proxyOptions = url.parse('http://localhost:8035/');
     proxyOptions.via = 'my-proxy-name';
-    var app = connect(proxy(proxyOptions));
+    var app = connect();
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8035, 'localhost', function() {
       app.listen(8034);
@@ -221,7 +223,8 @@ describe("proxy", function() {
 
     var proxyOptions = url.parse('http://localhost:8045/');
     proxyOptions.via = 'my-proxy-name';
-    var app = connect(proxy(proxyOptions));
+    var app = connect();
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8045, 'localhost', function() {
       app.listen(8044);
@@ -246,7 +249,8 @@ describe("proxy", function() {
     });
 
     var proxyOptions = url.parse('http://localhost:8055/');
-    var app = connect(proxy(proxyOptions));
+    var app = connect();
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8055, 'localhost', function() {
       app.listen(8054);
@@ -281,7 +285,8 @@ describe("proxy", function() {
 
     var proxyOptions = url.parse('http://localhost:8065/');
     proxyOptions.cookieRewrite = ".proxy.com";
-    var app = connect(proxy(proxyOptions));
+    var app = connect();
+    app.use(proxy(proxyOptions));
 
     destServer.listen(8065, 'localhost', function() {
       app.listen(8064);
