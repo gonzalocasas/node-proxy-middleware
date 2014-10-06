@@ -21,6 +21,7 @@ app.use('/api', proxy(url.parse('https://example.com/endpoint')));
 Other options:
 - `route`: you can pass the route for connect middleware within the options, as well.
 - `via`: by default no [via header](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45) is added. If you pass `true` for this option the local hostname will be used for the via header. You can also pass a string for this option in which case that will be used for the via header.
+- `cookieRewrite`: this option can be used to support cookies via the proxy by rewriting the cookie domain to that of the proxy server. By default cookie domains are not rewritten. The `cookieRewrite` option works as the `via` option - if you pass `true` the local hostname will be used, and if you pass a string that will be used as the rewritten cookie domain.
 
 ### Usage with route:
 

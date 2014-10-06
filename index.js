@@ -1,6 +1,6 @@
 var owns = {}.hasOwnProperty;
 module.exports = function proxyMiddleware(options) {
-  
+
   var httpLib = options.protocol === 'https:' ? 'https' : 'http';
   var request = require(httpLib).request;
   options = options || {};
@@ -29,7 +29,7 @@ module.exports = function proxyMiddleware(options) {
 
     // Forwarding the host breaks dotcloud
     delete opts.headers["host"];
-    
+
     var myReq = request(opts, function (myRes) {
       var statusCode = myRes.statusCode
         , headers = myRes.headers
@@ -40,6 +40,7 @@ module.exports = function proxyMiddleware(options) {
         headers.location = location.replace(options.href, slashJoin('', slashJoin((options.route || ''), '')));
       }
       applyViaHeader(myRes.headers, opts, myRes.headers);
+      rewriteCookieHosts(myRes.headers, opts, myRes.headers);
       resp.writeHead(myRes.statusCode, myRes.headers);
       myRes.on('error', function (err) {
         next(err);
@@ -58,11 +59,10 @@ module.exports = function proxyMiddleware(options) {
 };
 
 function applyViaHeader(existingHeaders, opts, applyTo) {
-
   if(!opts.via) {
     return;
   }
-  
+
   var viaName = (true === opts.via) ?
     // use the host name
     require('os').hostname() :
@@ -76,7 +76,26 @@ function applyViaHeader(existingHeaders, opts, applyTo) {
     }
 
     applyTo.via = viaHeader;
+}
 
+function rewriteCookieHosts(existingHeaders, opts, applyTo) {
+  if (!opts.cookieRewrite || !owns.call(existingHeaders, 'set-cookie')) {
+    return;
+  }
+
+  var existingCookies = existingHeaders['set-cookie'],
+      rewrittenCookies = [],
+      rewriteHostname = (true === opts.cookieRewrite) ? require('os').hostname() : opts.cookieRewrite;
+
+  if (!require('util').isArray(existingCookies)) {
+    existingCookies = [ existingCookies ];
+  }
+
+  for (var i = 0; i < existingCookies.length; i++) {
+    rewrittenCookies.push(existingCookies[i].replace(/(Domain)=[a-z\.-_]*?(;|$)/gi, '$1=' + rewriteHostname + '$2'));
+  }
+
+  applyTo['set-cookie'] = rewrittenCookies;
 }
 
 function slashJoin(p1, p2) {
