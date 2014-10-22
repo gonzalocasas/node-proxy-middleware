@@ -90,9 +90,9 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo, req) {
   for (var i = 0; i < existingCookies.length; i++) {
     var rewrittenCookie = existingCookies[i].replace(/(Domain)=[a-z\.-_]*?(;|$)/gi, '$1=' + rewriteHostname + '$2');
 
-    //if (req.protocol === 'http') {
+    if (!req.connection.encrypted) {
       rewrittenCookie = rewrittenCookie.replace(/;\s*?(Secure)/, '');
-    //}
+    }
     rewrittenCookies.push(rewrittenCookie);
   }
 
