@@ -44,7 +44,7 @@ module.exports = function proxyMiddleware(options) {
         headers.location = location.replace(options.href, slashJoin('', slashJoin((options.route || ''), '')));
       }
       applyViaHeader(myRes.headers, opts, myRes.headers);
-      rewriteCookieHosts(myRes.headers, opts, myRes.headers);
+      rewriteCookieHosts(myRes.headers, opts, myRes.headers, req);
       resp.writeHead(myRes.statusCode, myRes.headers);
       myRes.on('error', function (err) {
         next(err);
@@ -74,7 +74,7 @@ function applyViaHeader(existingHeaders, opts, applyTo) {
   applyTo.via = viaHeader;
 }
 
-function rewriteCookieHosts(existingHeaders, opts, applyTo) {
+function rewriteCookieHosts(existingHeaders, opts, applyTo, req) {
   if (!opts.cookieRewrite || !owns.call(existingHeaders, 'set-cookie')) {
     return;
   }
@@ -88,7 +88,12 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo) {
   }
 
   for (var i = 0; i < existingCookies.length; i++) {
-    rewrittenCookies.push(existingCookies[i].replace(/(Domain)=[a-z\.-_]*?(;|$)/gi, '$1=' + rewriteHostname + '$2'));
+    var rewrittenCookie = existingCookies[i].replace(/(Domain)=[a-z\.-_]*?(;|$)/gi, '$1=' + rewriteHostname + '$2');
+
+    if (!req.connection.encrypted) {
+      rewrittenCookie = rewrittenCookie.replace(/;\s*?(Secure)/, '');
+    }
+    rewrittenCookies.push(rewrittenCookie);
   }
 
   applyTo['set-cookie'] = rewrittenCookies;

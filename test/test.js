@@ -278,7 +278,7 @@ describe("proxy", function() {
         cookie1('.server.com'),
         cookie2('.server.com'),
         cookie3('.server.com'),
-        cookie4('.server.com'),
+        cookie4('.server.com')
       ]);
       resp.write(req.url);
       resp.end();
@@ -300,6 +300,45 @@ describe("proxy", function() {
         assert.strictEqual(cookies[1], cookie2(proxyOptions.cookieRewrite));
         assert.strictEqual(cookies[2], cookie3(proxyOptions.cookieRewrite));
         assert.strictEqual(cookies[3], cookie4(proxyOptions.cookieRewrite));
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    })
+  });
+
+  it("removes the Secure directive when proxying from https to http", function(done) {
+    var cookie1 = function(host, after) { 
+      if (after) {
+        return 'cookie1=value1; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Domain=' + host; 
+      } else {
+        return 'cookie1=value1; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Domain=' + host+';Secure'; 
+      }
+    };
+
+    var destServer = createServerWithLibName('https', function(req, resp) {
+      resp.statusCode = 200;
+      resp.setHeader('set-cookie', [
+        cookie1('.server.com')
+      ]);
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('https://localhost:8066/');
+    proxyOptions.cookieRewrite = ".proxy.com";
+    proxyOptions.rejectUnauthorized = false;
+    var app = connect();
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8066, 'localhost', function() {
+      app.listen(8067);
+
+      var options = url.parse('http://localhost:8067/foo/test/');
+
+      http.get(options, function (res) {
+        var cookies = res.headers['set-cookie'];
+        assert.strictEqual(cookies[0], cookie1(proxyOptions.cookieRewrite, true));
         done();
       }).on('error', function () {
         assert.fail('Request proxy failed');
