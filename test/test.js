@@ -91,6 +91,38 @@ describe("proxy", function() {
     });
   });
 
+  it("can proxy an exact url.", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8074/foo');
+    proxyOptions.route = '/foo';
+
+    var app = connect();
+    app.use(serveStatic(path.resolve('.')));
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8074, 'localhost', function() {
+      app.listen(8075);
+      http.get('http://localhost:8075/foo', function(res) {
+        var data = '';
+        res.on('data', function (chunk) {
+          data += chunk;
+        });
+        res.on('end', function () {
+          assert.strictEqual(data, '/foo/');
+          destServer.close();
+          done();
+        });
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
   it("Does not keep header data across requests", function(done) {
     var headerValues = ['foo', 'bar'];
     var reqIdx = 0;
