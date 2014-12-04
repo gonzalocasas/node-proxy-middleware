@@ -98,16 +98,16 @@ describe("proxy", function() {
       resp.end();
     });
 
-    var proxyOptions = url.parse('http://localhost:8004/foo');
+    var proxyOptions = url.parse('http://localhost:8074/foo');
     proxyOptions.route = '/foo';
 
     var app = connect();
     app.use(serveStatic(path.resolve('.')));
     app.use(proxy(proxyOptions));
 
-    destServer.listen(8004, 'localhost', function() {
-      app.listen(8005);
-      http.get('http://localhost:8005/foo', function(res) {
+    destServer.listen(8074, 'localhost', function() {
+      app.listen(8075);
+      http.get('http://localhost:8075/foo', function(res) {
         var data = '';
         res.on('data', function (chunk) {
           data += chunk;
