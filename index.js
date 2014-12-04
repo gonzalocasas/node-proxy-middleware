@@ -16,7 +16,9 @@ module.exports = function proxyMiddleware(options) {
     // You can pass the route within the options, as well
     if (typeof options.route === 'string') {
       var route = slashJoin(options.route, '');
-      if (url.slice(0, route.length) === route) {
+      if (url === options.route) {
+        url = '';
+      } else if (url.slice(0, route.length) === route) {
         url = url.slice(route.length);
       } else {
         return next();
