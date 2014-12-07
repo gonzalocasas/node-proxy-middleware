@@ -378,6 +378,83 @@ describe("proxy", function() {
     })
   });
 
+  it("does not forward the Host header with default options", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      assert.strictEqual(req.headers.host, 'localhost:8068');
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8068/');
+    var app = connect();
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8068, 'localhost', function() {
+      app.listen(8069);
+
+      var options = url.parse('http://localhost:8069/foo/test/');
+      http.get(options, function () {
+        // ok...
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("does not forward the Host header with options.preserveHost = false", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      assert.strictEqual(req.headers.host, 'localhost:8070');
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8070/');
+    proxyOptions.preserveHost = false;
+    var app = connect();
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8070, 'localhost', function() {
+      app.listen(8071);
+
+      var options = url.parse('http://localhost:8071/foo/test/');
+      http.get(options, function () {
+        // ok...
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("forwards the Host header with options.preserveHost = true", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      assert.strictEqual(req.headers.host, 'localhost:8073');
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8072/');
+    proxyOptions.preserveHost = true;
+    var app = connect();
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8072, 'localhost', function() {
+      app.listen(8073);
+
+      var options = url.parse('http://localhost:8073/foo/test/');
+      http.get(options, function () {
+        // ok...
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
 });
 
 function createServerWithLibName(libName, requestListener) {

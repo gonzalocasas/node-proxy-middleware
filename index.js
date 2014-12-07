@@ -33,8 +33,10 @@ module.exports = function proxyMiddleware(options) {
 
     applyViaHeader(req.headers, opts, opts.headers);
 
-    // Forwarding the host breaks dotcloud
-    delete opts.headers.host;
+    if (!options.preserveHost) {
+      // Forwarding the host breaks dotcloud
+      delete opts.headers.host;
+    }
 
     var myReq = request(opts, function (myRes) {
       var statusCode = myRes.statusCode
