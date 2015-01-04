@@ -15,11 +15,10 @@ module.exports = function proxyMiddleware(options) {
     var url = req.url;
     // You can pass the route within the options, as well
     if (typeof options.route === 'string') {
-      var route = options.route; //slashJoin(options.route, '');
       if (url === options.route) {
         url = '';
-      } else if (url.slice(0, route.length) === route) {
-        url = url.slice(route.length);
+      } else if (url.slice(0, options.route.length) === options.route) {
+        url = url.slice(options.route.length);
       } else {
         return next();
       }
@@ -29,7 +28,7 @@ module.exports = function proxyMiddleware(options) {
     var opts = extend({}, options);
     if (url && url.charAt(0) === '?') { // prevent /api/resource/?offset=0
       if (options.pathname.charAt(options.pathname.length - 1) === '/') {
-        opts.path = options.pathname.substring(0, options.pathname.length - 2) + url;
+        opts.path = options.pathname.substring(0, options.pathname.length - 1) + url;
       } else {
         opts.path = options.pathname + url;
       }
