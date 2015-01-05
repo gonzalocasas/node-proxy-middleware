@@ -27,7 +27,7 @@ module.exports = function proxyMiddleware(options) {
     //options for this request
     var opts = extend({}, options);
     if (url && url.charAt(0) === '?') { // prevent /api/resource/?offset=0
-      if (options.pathname.charAt(options.pathname.length - 1) === '/') {
+      if (options.pathname.length > 1 && options.pathname.charAt(options.pathname.length - 1) === '/') {
         opts.path = options.pathname.substring(0, options.pathname.length - 1) + url;
       } else {
         opts.path = options.pathname + url;
