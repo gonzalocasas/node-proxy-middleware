@@ -32,8 +32,10 @@ module.exports = function proxyMiddleware(options) {
       } else {
         opts.path = options.pathname + url;
       }
-    } else {
+    } else if (url) {
       opts.path = slashJoin(options.pathname, url);
+    } else {
+      opts.path = options.pathname;
     }
     opts.method = req.method;
     opts.headers = options.headers ? merge(req.headers, options.headers) : req.headers;

@@ -145,7 +145,7 @@ describe('proxy', function() {
           data += chunk;
         });
         res.on('end', function () {
-          assert.strictEqual(data, '/foo/');
+          assert.strictEqual(data, '/foo');
           destServer.close();
           done();
         });
