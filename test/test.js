@@ -59,7 +59,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Can proxy just the given route.", function(done) {
+  it("can proxy just the given route.", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 200;
       resp.write(req.url);
@@ -123,7 +123,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Can proxy an exact url.", function(done) {
+  it("can proxy an exact url.", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 200;
       resp.write(req.url);
@@ -226,7 +226,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Correctly applies the via header to the request", function(done) {
+  it("correctly applies the via header to the request", function(done) {
 
     var destServer = createServerWithLibName('http', function(req, resp) {
       assert.strictEqual(req.headers.via, '1.1 my-proxy-name');
@@ -254,7 +254,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Correctly applies the via header to the request where the request has an existing via header", function(done) {
+  it("correctly applies the via header to the request where the request has an existing via header", function(done) {
 
     var destServer = createServerWithLibName('http', function(req, resp) {
       assert.strictEqual(req.headers.via, '1.0 other-proxy-name, 1.1 my-proxy-name');
@@ -283,7 +283,7 @@ describe("proxy", function() {
     });
   });
 
-  it('Correctly applies the via header to the response', function(done) {
+  it("correctly applies the via header to the response", function(done) {
 
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 200;
@@ -310,7 +310,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Correctly applies the via header to the response where the response has an existing via header", function(done) {
+  it("correctly applies the via header to the response where the response has an existing via header", function(done) {
 
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 200;
@@ -338,7 +338,7 @@ describe("proxy", function() {
     });
   });
 
-  it('Correctly apllies the location header to the response when the response status code is 3xx', function(done) {
+  it("correctly apllies the location header to the response when the response status code is 3xx", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 302;
       resp.setHeader('location', 'http://localhost:8055/foo/redirect/');
@@ -364,7 +364,7 @@ describe("proxy", function() {
     })
   });
 
-  it("Correctly rewrites the cookie domain for set-cookie headers", function(done) {
+  it("correctly rewrites the cookie domain for set-cookie headers", function(done) {
     var cookie1 = function(host) { return 'cookie1=value1; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Path=/; Domain=' + host + '; HttpOnly'; };
     var cookie2 = function(host) { return 'cookie2=value2; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Domain=' + host + '; Path=/test/'; };
     var cookie3 = function(host) { return 'cookie3=value3'; };
@@ -404,7 +404,7 @@ describe("proxy", function() {
     })
   });
 
-  it("Removes the Secure directive when proxying from https to http", function(done) {
+  it("removes the Secure directive when proxying from https to http", function(done) {
     var cookie1 = function(host, after) { 
       if (after) {
         return 'cookie1=value1; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Domain=' + host; 
@@ -423,7 +423,7 @@ describe("proxy", function() {
     });
 
     var proxyOptions = url.parse('https://localhost:8066/');
-    proxyOptions.cookieRewrite = '.proxy.com';
+    proxyOptions.cookieRewrite = ".proxy.com";
     proxyOptions.rejectUnauthorized = false;
     var app = connect();
     app.use(proxy(proxyOptions));
@@ -443,7 +443,7 @@ describe("proxy", function() {
     })
   });
 
-  it("Does not forward the Host header with default options", function(done) {
+  it("does not forward the Host header with default options", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       assert.strictEqual(req.headers.host, 'localhost:8068');
       resp.statusCode = 200;
@@ -468,7 +468,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Does not forward the Host header with options.preserveHost = false", function(done) {
+  it("does not forward the Host header with options.preserveHost = false", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       assert.strictEqual(req.headers.host, 'localhost:8070');
       resp.statusCode = 200;
@@ -494,7 +494,7 @@ describe("proxy", function() {
     });
   });
 
-  it("Forwards the Host header with options.preserveHost = true", function(done) {
+  it("forwards the Host header with options.preserveHost = true", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       assert.strictEqual(req.headers.host, 'localhost:8073');
       resp.statusCode = 200;
