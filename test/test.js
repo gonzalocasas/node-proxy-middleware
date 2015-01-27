@@ -91,6 +91,38 @@ describe("proxy", function() {
     });
   });
 
+  it("Can proxy just the given route with query.", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8021');
+    proxyOptions.route = '/foo';
+
+    var app = connect();
+    app.use(serveStatic(path.resolve('.')));
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8021, 'localhost', function() {
+      app.listen(8022);
+      http.get('http://localhost:8022/foo?baz=true', function(res) {
+        var data = '';
+        res.on('data', function (chunk) {
+          data += chunk;
+        });
+        res.on('end', function () {
+          assert.strictEqual(data, '/?baz=true');
+          destServer.close();
+          done();
+        });
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
   it("can proxy an exact url.", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 200;
@@ -113,7 +145,7 @@ describe("proxy", function() {
           data += chunk;
         });
         res.on('end', function () {
-          assert.strictEqual(data, '/foo/');
+          assert.strictEqual(data, '/foo');
           destServer.close();
           done();
         });
@@ -123,7 +155,40 @@ describe("proxy", function() {
     });
   });
 
-  it("Does not keep header data across requests", function(done) {
+  it("Can proxy url with query.", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 200;
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8028/foo-bar');
+    proxyOptions.route = '/foo-bar';
+
+    var app = connect();
+    app.use(serveStatic(path.resolve('.')));
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8028, 'localhost', function() {
+      app.listen(8029);
+      http.get('http://localhost:8029/foo-bar?baz=true', function(res) {
+
+        var data = '';
+        res.on('data', function (chunk) {
+          data += chunk;
+        });
+        res.on('end', function () {
+          assert.strictEqual(data, '/foo-bar?baz=true');
+          destServer.close();
+          done();
+        });
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    });
+  });
+
+  it("Does not keep header data across requests.", function(done) {
     var headerValues = ['foo', 'bar'];
     var reqIdx = 0;
 
