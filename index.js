@@ -104,7 +104,7 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo, req) {
     var rewrittenCookie = existingCookies[i].replace(/(Domain)=[a-z\.-_]*?(;|$)/gi, '$1=' + rewriteHostname + '$2');
 
     if (!req.connection.encrypted) {
-      rewrittenCookie = rewrittenCookie.replace(/;\s*?(Secure)/, '');
+      rewrittenCookie = rewrittenCookie.replace(/;\s*?(Secure)/i, '');
     }
     rewrittenCookies.push(rewrittenCookie);
   }
