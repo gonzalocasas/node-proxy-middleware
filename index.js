@@ -52,7 +52,7 @@ module.exports = function proxyMiddleware(options) {
         , headers = myRes.headers
         , location = headers.location;
       // Fix the location
-      if (statusCode > 300 && statusCode < 304 && location.indexOf(options.href) > -1) {
+      if (statusCode > 300 && statusCode < 304 && location && location.indexOf(options.href) > -1) {
         // absoulte path
         headers.location = location.replace(options.href, slashJoin('', slashJoin((options.route || ''), '')));
       }
