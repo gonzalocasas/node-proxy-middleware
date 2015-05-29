@@ -10,6 +10,7 @@ module.exports = function proxyMiddleware(options) {
   options = options || {};
   options.hostname = options.hostname;
   options.port = options.port;
+  options.pathname = options.pathname || '/';
 
   return function (req, resp, next) {
     var url = req.url;
