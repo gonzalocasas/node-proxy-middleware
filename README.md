@@ -10,6 +10,9 @@ var proxy = require('proxy-middleware');
 var app = connect();
 app.use('/api', proxy(url.parse('https://example.com/endpoint')));
 // now requests to '/api/x/y/z' are proxied to 'https://example.com/endpoint/x/y/z'
+
+//same as example above but also uses a short hand string only parameter
+app.use('/api-string-only', proxy('https://example.com/endpoint'));
 ```
 
 ### Documentation:
