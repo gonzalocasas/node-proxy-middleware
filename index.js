@@ -4,7 +4,6 @@ var https = require('https');
 var owns = {}.hasOwnProperty;
 
 module.exports = function proxyMiddleware(options) {
-    
   //enable ability to quickly pass a url for shorthand setup
   if(typeof options === 'string'){
       options = require('url').parse(options);
