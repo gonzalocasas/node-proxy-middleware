@@ -4,14 +4,15 @@ var https = require('https');
 var owns = {}.hasOwnProperty;
 
 module.exports = function proxyMiddleware(options) {
+    
+  //enable ability to quickly pass a url for shorthand setup
+  if(typeof options === 'string'){
+      options = require('url').parse(options);
+  }
 
   var httpLib = options.protocol === 'https:' ? https : http;
   var request = httpLib.request;
 
-  //enable ability to quickly pass a url for shorthand setup
-  if(typeof options === 'string'){
-    options = require('url').parse(options);
-  }
   options = options || {};
   options.hostname = options.hostname;
   options.port = options.port;
