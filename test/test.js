@@ -364,6 +364,7 @@ describe("proxy", function() {
     })
   });
 
+
   it("correctly rewrites the cookie domain for set-cookie headers", function(done) {
     var cookie1 = function(host) { return 'cookie1=value1; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Path=/; Domain=' + host + '; HttpOnly'; };
     var cookie2 = function(host) { return 'cookie2=value2; Expires=Fri, 01-Mar-2019 00:00:01 GMT; Domain=' + host + '; Path=/test/'; };
@@ -518,6 +519,32 @@ describe("proxy", function() {
         assert.fail('Request proxy failed');
       });
     });
+  });
+
+  it("correctly apllies the location header to the response when the response status code is 201", function(done) {
+    var destServer = createServerWithLibName('http', function(req, resp) {
+      resp.statusCode = 201;
+      resp.setHeader('location', 'http://localhost:8085/foo/redirect/');
+      resp.write(req.url);
+      resp.end();
+    });
+
+    var proxyOptions = url.parse('http://localhost:8085/');
+    var app = connect();
+    app.use(proxy(proxyOptions));
+
+    destServer.listen(8085, 'localhost', function() {
+      app.listen(8084);
+
+      var options = url.parse('http://localhost:8084/foo/test/');
+
+      http.get(options, function (res) {
+        assert.strictEqual('/foo/redirect/', res.headers.location);
+        done();
+      }).on('error', function () {
+        assert.fail('Request proxy failed');
+      });
+    })
   });
 
 });
