@@ -521,7 +521,7 @@ describe("proxy", function() {
     });
   });
 
-  it("correctly apllies the location header to the response when the response status code is 201", function(done) {
+  it("correctly applies the location header to the response when the response status code is 201", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 201;
       resp.setHeader('location', 'http://localhost:8085/foo/redirect/');
