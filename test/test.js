@@ -356,7 +356,7 @@ describe("proxy", function() {
       var options = url.parse('http://localhost:8054/foo/test/');
 
       http.get(options, function (res) {
-        assert.strictEqual('/foo/redirect/', res.headers.location);
+        assert.strictEqual(res.headers.location, '/foo/redirect/');
         done();
       }).on('error', function () {
         assert.fail('Request proxy failed');
