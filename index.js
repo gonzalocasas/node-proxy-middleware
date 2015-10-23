@@ -119,9 +119,14 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo, req) {
 }
 
 function slashJoin(p1, p2) {
-  if (p1.length && p1[p1.length - 1] === '/') {p1 = p1.substring(0, p1.length - 1); }
+  var trailing_slash = false;
+  if (p1.length && p1[p1.length - 1] === '/') {
+    p1 = p1.substring(0, p1.length - 1);
+    trailing_slash = true;
+  }
   if (p2.length && p2[0] === '/') {p2 = p2.substring(1); }
-  return p1 + '/' + p2;
+
+  return trailing_slash ? p1 + '/' + p2 : p1 + p2;
 }
 
 function extend(obj, src) {
