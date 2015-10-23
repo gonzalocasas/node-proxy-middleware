@@ -338,7 +338,7 @@ describe("proxy", function() {
     });
   });
 
-  it("correctly apllies the location header to the response when the response status code is 3xx", function(done) {
+  it("correctly applies the location header to the response when the response status code is 3xx", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 302;
       resp.setHeader('location', 'http://localhost:8055/foo/redirect/');
@@ -356,7 +356,7 @@ describe("proxy", function() {
       var options = url.parse('http://localhost:8054/foo/test/');
 
       http.get(options, function (res) {
-        assert.strictEqual('/foo/redirect/', res.headers.location);
+        assert.strictEqual(res.headers.location, '/foo/redirect/');
         done();
       }).on('error', function () {
         assert.fail('Request proxy failed');
@@ -521,7 +521,7 @@ describe("proxy", function() {
     });
   });
 
-  it("correctly apllies the location header to the response when the response status code is 201", function(done) {
+  it("correctly applies the location header to the response when the response status code is 201", function(done) {
     var destServer = createServerWithLibName('http', function(req, resp) {
       resp.statusCode = 201;
       resp.setHeader('location', 'http://localhost:8085/foo/redirect/');
@@ -539,7 +539,7 @@ describe("proxy", function() {
       var options = url.parse('http://localhost:8084/foo/test/');
 
       http.get(options, function (res) {
-        assert.strictEqual('/foo/redirect/', res.headers.location);
+        assert.strictEqual(res.headers.location, '/foo/redirect/');
         done();
       }).on('error', function () {
         assert.fail('Request proxy failed');
